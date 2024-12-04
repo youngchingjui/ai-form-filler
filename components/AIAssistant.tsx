@@ -24,6 +24,7 @@ export default function AIAssistant({
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
   const [isRecording, setIsRecording] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -34,32 +35,33 @@ export default function AIAssistant({
   }, [input])
 
   const handleAIFill = async () => {
-    // This is where you would typically call your AI service to process the input
-    // For now, we'll just simulate it with a timeout
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    if (!input.trim()) return
 
-    // Simulated AI response
-    const aiResponse = {
-      fullName: "John Doe",
-      dateOfBirth: "1990-01-01",
-      email: "john.doe@example.com",
-      phone: "123-456-7890",
-      address: "123 Main St, Anytown, USA",
-      occupation: "Software Developer",
-      annualIncome: "100000",
-      netWorth: "500000",
-      investmentExperience: "Moderate experience with stocks and bonds",
-      riskTolerance: "Medium risk tolerance",
-      investmentGoals: "Retirement savings and wealth accumulation",
-      timeHorizon: "20 years",
-      liquidityNeeds: "Low, can keep investments for long term",
-      taxStatus: "Employed, standard tax bracket",
+    setIsLoading(true)
+    try {
+      const response = await fetch("/api/analyze-financial", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userInput: input }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to analyze financial information")
+      }
+
+      const data = await response.json()
+      onFill(data)
+      setIsOpen(false)
+      onOpenChange(false)
+      setInput("")
+    } catch (error) {
+      console.error("Error processing AI response:", error)
+      // Here you might want to show an error message to the user
+    } finally {
+      setIsLoading(false)
     }
-
-    onFill(aiResponse)
-    setIsOpen(false)
-    onOpenChange(false)
-    setInput("")
   }
 
   const toggleRecording = () => {
@@ -101,7 +103,7 @@ export default function AIAssistant({
             />
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button onClick={toggleRecording}>
+            <Button onClick={toggleRecording} disabled={isLoading}>
               {isRecording ? (
                 <StopCircle className="mr-2 h-4 w-4" />
               ) : (
@@ -109,7 +111,9 @@ export default function AIAssistant({
               )}
               {isRecording ? "Stop Recording" : "Start Voice Input"}
             </Button>
-            <Button onClick={handleAIFill}>Fill Form</Button>
+            <Button onClick={handleAIFill} disabled={isLoading}>
+              {isLoading ? "Processing..." : "Fill Form"}
+            </Button>
           </CardFooter>
         </Card>
       )}
