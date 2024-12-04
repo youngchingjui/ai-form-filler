@@ -1,5 +1,7 @@
 import OpenAI from "openai"
 import { NextResponse } from "next/server"
+import { zodResponseFormat } from "openai/helpers/zod.mjs"
+import { formDataSchema } from "@/lib/schemas"
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API,
@@ -27,7 +29,7 @@ export async function POST(request: Request) {
     const { userInput } = await request.json()
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
@@ -44,14 +46,12 @@ Analyze the user's input and return ONLY the fields that can be confidently dete
           content: userInput,
         },
       ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {},
-      },
+      response_format: zodResponseFormat(formDataSchema, "formData"),
     })
 
     const response = completion.choices[0].message.content
 
+    console.log("response", response)
     if (!response) {
       return NextResponse.json(
         { error: "No response from OpenAI" },

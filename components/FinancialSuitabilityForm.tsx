@@ -14,6 +14,8 @@ import {
   CardFooter,
 } from "@/components/ui/card"
 import AIAssistant from "./AIAssistant"
+import { formDataSchema } from "@/lib/schemas"
+import { z } from "zod"
 
 type FormData = {
   fullName: string
@@ -22,8 +24,8 @@ type FormData = {
   phone: string
   address: string
   occupation: string
-  annualIncome: string
-  netWorth: string
+  annualIncome: number
+  netWorth: number
   investmentExperience: string
   riskTolerance: string
   investmentGoals: string
@@ -40,8 +42,8 @@ export default function FinancialSuitabilityForm() {
     phone: "",
     address: "",
     occupation: "",
-    annualIncome: "",
-    netWorth: "",
+    annualIncome: 0,
+    netWorth: 0,
     investmentExperience: "",
     riskTolerance: "",
     investmentGoals: "",
@@ -51,18 +53,36 @@ export default function FinancialSuitabilityForm() {
   })
 
   const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false)
+  const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([])
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    setFormData((prevData) => ({ ...prevData, [name]: value }))
+
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]:
+        name === "annualIncome" || name === "netWorth" ? Number(value) : value,
+    }))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Form submitted:", formData)
-    // Here you would typically send the data to an API
+    try {
+      formDataSchema.parse(formData)
+      console.log("Form submitted:", formData)
+      setFormErrors([])
+      // Proceed with form submission logic, such as sending data to an API
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // Handle validation errors
+        console.error("Validation errors:", error.errors)
+        setFormErrors(error.errors)
+      } else {
+        console.error("An unexpected error occurred:", error)
+      }
+    }
   }
 
   return (
@@ -112,6 +132,14 @@ export default function FinancialSuitabilityForm() {
                 onChange={handleInputChange}
                 required
               />
+              {formErrors.find((error) => error.path[0] === "email") && (
+                <p className="text-red-500 text-sm">
+                  {
+                    formErrors.find((error) => error.path[0] === "email")
+                      ?.message
+                  }
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
@@ -123,6 +151,14 @@ export default function FinancialSuitabilityForm() {
                 onChange={handleInputChange}
                 required
               />
+              {formErrors.find((error) => error.path[0] === "phone") && (
+                <p className="text-red-500 text-sm">
+                  {
+                    formErrors.find((error) => error.path[0] === "phone")
+                      ?.message
+                  }
+                </p>
+              )}
             </div>
           </div>
           <div className="space-y-2">
@@ -134,6 +170,14 @@ export default function FinancialSuitabilityForm() {
               onChange={handleInputChange}
               required
             />
+            {formErrors.find((error) => error.path[0] === "address") && (
+              <p className="text-red-500 text-sm">
+                {
+                  formErrors.find((error) => error.path[0] === "address")
+                    ?.message
+                }
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="occupation">Occupation</Label>
@@ -144,6 +188,14 @@ export default function FinancialSuitabilityForm() {
               onChange={handleInputChange}
               required
             />
+            {formErrors.find((error) => error.path[0] === "occupation") && (
+              <p className="text-red-500 text-sm">
+                {
+                  formErrors.find((error) => error.path[0] === "occupation")
+                    ?.message
+                }
+              </p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -156,6 +208,14 @@ export default function FinancialSuitabilityForm() {
                 onChange={handleInputChange}
                 required
               />
+              {formErrors.find((error) => error.path[0] === "annualIncome") && (
+                <p className="text-red-500 text-sm">
+                  {
+                    formErrors.find((error) => error.path[0] === "annualIncome")
+                      ?.message
+                  }
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="netWorth">Net Worth</Label>
@@ -167,6 +227,14 @@ export default function FinancialSuitabilityForm() {
                 onChange={handleInputChange}
                 required
               />
+              {formErrors.find((error) => error.path[0] === "netWorth") && (
+                <p className="text-red-500 text-sm">
+                  {
+                    formErrors.find((error) => error.path[0] === "netWorth")
+                      ?.message
+                  }
+                </p>
+              )}
             </div>
           </div>
           <div className="space-y-2">
@@ -178,6 +246,17 @@ export default function FinancialSuitabilityForm() {
               onChange={handleInputChange}
               required
             />
+            {formErrors.find(
+              (error) => error.path[0] === "investmentExperience"
+            ) && (
+              <p className="text-red-500 text-sm">
+                {
+                  formErrors.find(
+                    (error) => error.path[0] === "investmentExperience"
+                  )?.message
+                }
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="riskTolerance">Risk Tolerance</Label>
@@ -188,6 +267,14 @@ export default function FinancialSuitabilityForm() {
               onChange={handleInputChange}
               required
             />
+            {formErrors.find((error) => error.path[0] === "riskTolerance") && (
+              <p className="text-red-500 text-sm">
+                {
+                  formErrors.find((error) => error.path[0] === "riskTolerance")
+                    ?.message
+                }
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="investmentGoals">Investment Goals</Label>
@@ -198,6 +285,17 @@ export default function FinancialSuitabilityForm() {
               onChange={handleInputChange}
               required
             />
+            {formErrors.find(
+              (error) => error.path[0] === "investmentGoals"
+            ) && (
+              <p className="text-red-500 text-sm">
+                {
+                  formErrors.find(
+                    (error) => error.path[0] === "investmentGoals"
+                  )?.message
+                }
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="timeHorizon">Investment Time Horizon</Label>
@@ -208,6 +306,14 @@ export default function FinancialSuitabilityForm() {
               onChange={handleInputChange}
               required
             />
+            {formErrors.find((error) => error.path[0] === "timeHorizon") && (
+              <p className="text-red-500 text-sm">
+                {
+                  formErrors.find((error) => error.path[0] === "timeHorizon")
+                    ?.message
+                }
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="liquidityNeeds">Liquidity Needs</Label>
@@ -218,6 +324,14 @@ export default function FinancialSuitabilityForm() {
               onChange={handleInputChange}
               required
             />
+            {formErrors.find((error) => error.path[0] === "liquidityNeeds") && (
+              <p className="text-red-500 text-sm">
+                {
+                  formErrors.find((error) => error.path[0] === "liquidityNeeds")
+                    ?.message
+                }
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="taxStatus">Tax Status</Label>
@@ -228,6 +342,14 @@ export default function FinancialSuitabilityForm() {
               onChange={handleInputChange}
               required
             />
+            {formErrors.find((error) => error.path[0] === "taxStatus") && (
+              <p className="text-red-500 text-sm">
+                {
+                  formErrors.find((error) => error.path[0] === "taxStatus")
+                    ?.message
+                }
+              </p>
+            )}
           </div>
         </form>
       </CardContent>
