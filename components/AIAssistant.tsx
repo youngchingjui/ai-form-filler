@@ -56,6 +56,7 @@ export default function AIAssistant({
       // Remove all undefined or null values
       const cleanedData = Object.fromEntries(
         Object.entries(data).filter(
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           ([_, value]) => value !== undefined && value !== null && value !== ""
         )
       )
