@@ -62,8 +62,6 @@ export default function AIAssistant({
       )
 
       onFill(cleanedData as Record<string, string>)
-      setIsOpen(false)
-      onOpenChange(false)
       setInput("")
     } catch (error) {
       console.error("Error processing AI response:", error)
