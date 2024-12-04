@@ -52,7 +52,15 @@ export default function AIAssistant({
       }
 
       const data = await response.json()
-      onFill(data)
+
+      // Remove all undefined or null values
+      const cleanedData = Object.fromEntries(
+        Object.entries(data).filter(
+          ([_, value]) => value !== undefined && value !== null && value !== ""
+        )
+      )
+
+      onFill(cleanedData as Record<string, string>)
       setIsOpen(false)
       onOpenChange(false)
       setInput("")

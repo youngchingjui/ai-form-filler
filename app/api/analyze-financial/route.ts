@@ -51,7 +51,6 @@ Analyze the user's input and return ONLY the fields that can be confidently dete
 
     const response = completion.choices[0].message.content
 
-    console.log("response", response)
     if (!response) {
       return NextResponse.json(
         { error: "No response from OpenAI" },
